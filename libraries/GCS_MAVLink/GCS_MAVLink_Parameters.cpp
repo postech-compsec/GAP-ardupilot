@@ -157,7 +157,7 @@ const AP_Param::GroupInfo GCS_MAVLINK::var_info[] = {
 
     // @Param: _EXTRA1
     // @DisplayName: Extra data type 1 stream rate
-    // @Description: MAVLink Stream rate of ATTITUDE, SIMSTATE (SIM only), AHRS2, RPM, AOA_SSA, LANDING,ESC_TELEMETRY,EFI_STATUS, and PID_TUNING
+    // @Description: MAVLink Stream rate of ATTITUDE, SIMSTATE (SIM only), SIM_STATE (SIM only), AHRS2, RPM, AOA_SSA, LANDING,ESC_TELEMETRY,EFI_STATUS, and PID_TUNING
     // @Units: Hz
     // @Range: 0 50
     // @Increment: 1
@@ -298,6 +298,7 @@ static const ap_message STREAM_EXTRA1_msgs[] = {
 #endif  // AP_AHRS_ENABLED
 #if AP_SIM_ENABLED
     MSG_SIMSTATE,
+    MSG_SIM_STATE,
 #endif
 #if AP_AHRS_ENABLED
     MSG_AHRS2,

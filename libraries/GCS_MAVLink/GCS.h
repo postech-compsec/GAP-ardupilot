@@ -377,6 +377,7 @@ public:
     void send_servo_output_raw();
     void send_accelcal_vehicle_position(uint32_t position);
     void send_scaled_imu(uint8_t instance, void (*send_fn)(mavlink_channel_t chan, uint32_t time_ms, int16_t xacc, int16_t yacc, int16_t zacc, int16_t xgyro, int16_t ygyro, int16_t zgyro, int16_t xmag, int16_t ymag, int16_t zmag, int16_t temperature));
+    void send_get_gyro_bias();
     void send_sys_status();
     void send_set_position_target_global_int(uint8_t target_system, uint8_t target_component, const Location& loc);
     void send_rpm() const;
@@ -582,6 +583,7 @@ protected:
     void handle_mission_item(const mavlink_message_t &msg);
 
     void handle_distance_sensor(const mavlink_message_t &msg);
+    void handle_set_gyro_bias(const mavlink_message_t &msg);
     void handle_obstacle_distance(const mavlink_message_t &msg);
     void handle_obstacle_distance_3d(const mavlink_message_t &msg);
 

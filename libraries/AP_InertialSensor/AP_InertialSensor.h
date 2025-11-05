@@ -114,6 +114,12 @@ public:
     const Vector3f &get_gyro_offsets(uint8_t i) const { return _gyro_offset(i); }
     const Vector3f &get_gyro_offsets(void) const { return get_gyro_offsets(_first_usable_gyro); }
 
+    // External bias injection for asymmetric actor-critic training
+    // These methods allow external systems (e.g., RL training) to inject
+    // gyro bias that affects all sensor instances
+    static void set_external_gyro_bias(const Vector3f &bias);
+    static Vector3f get_external_gyro_bias();
+
     //get delta angle if available
     bool get_delta_angle(uint8_t i, Vector3f &delta_angle, float &delta_angle_dt) const;
     bool get_delta_angle(Vector3f &delta_angle, float &delta_angle_dt) const {

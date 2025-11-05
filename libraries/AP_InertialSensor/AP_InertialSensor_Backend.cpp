@@ -144,7 +144,7 @@ void AP_InertialSensor_Backend::_rotate_and_correct_accel(uint8_t instance, Vect
     accel.rotate(_imu._board_orientation);
 }
 
-void AP_InertialSensor_Backend::_rotate_and_correct_gyro(uint8_t instance, Vector3f &gyro) 
+void AP_InertialSensor_Backend::_rotate_and_correct_gyro(uint8_t instance, Vector3f &gyro)
 {
     // rotate for sensor orientation
     gyro.rotate(_imu._gyro_orientation[instance]);
@@ -154,7 +154,7 @@ void AP_InertialSensor_Backend::_rotate_and_correct_gyro(uint8_t instance, Vecto
         _imu.tcal(instance).update_gyro_learning(gyro, _imu.get_temperature(instance));
     }
 #endif
-    
+
     if (!_imu._calibrating_gyro) {
 
 #if HAL_INS_TEMPERATURE_CAL_ENABLE
@@ -167,6 +167,11 @@ void AP_InertialSensor_Backend::_rotate_and_correct_gyro(uint8_t instance, Vecto
     }
 
     gyro.rotate(_imu._board_orientation);
+
+    // Apply external bias injection (for asymmetric actor-critic training)
+    // This is added AFTER all standard corrections and board rotation
+    const Vector3f external_bias = AP_InertialSensor::get_external_gyro_bias();
+    gyro += external_bias;
 }
 
 /*

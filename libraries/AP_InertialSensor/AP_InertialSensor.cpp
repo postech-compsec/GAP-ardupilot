@@ -55,7 +55,11 @@
 
 extern const AP_HAL::HAL& hal;
 
-
+// Global storage for external gyro bias injection
+// Used for asymmetric actor-critic training where the critic needs access to sensor biases
+// Initialized to zero, updated via set_external_gyro_bias() from MAVLink
+static Vector3f g_external_gyro_bias;
+static HAL_Semaphore g_external_gyro_bias_sem;
 
 #if APM_BUILD_COPTER_OR_HELI
 #define DEFAULT_GYRO_FILTER  20
@@ -2813,6 +2817,23 @@ void AP_InertialSensor::force_save_calibration(void)
             _accel_id_ok[i] = true;
         }
     }
+}
+
+// External gyro bias injection for asymmetric actor-critic training
+// Set external gyro bias that will be added to all gyro measurements
+void AP_InertialSensor::set_external_gyro_bias(const Vector3f &bias)
+{
+    WITH_SEMAPHORE(g_external_gyro_bias_sem);
+    g_external_gyro_bias = bias;
+    GCS_SEND_TEXT(MAV_SEVERITY_INFO, "INS: External gyro bias set: %.5f, %.5f, %.5f rad/s",
+                  (double)bias.x, (double)bias.y, (double)bias.z);
+}
+
+// Get current external gyro bias
+Vector3f AP_InertialSensor::get_external_gyro_bias()
+{
+    WITH_SEMAPHORE(g_external_gyro_bias_sem);
+    return g_external_gyro_bias;
 }
 
 namespace AP {

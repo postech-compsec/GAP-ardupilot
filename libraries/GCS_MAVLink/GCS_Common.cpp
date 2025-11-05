@@ -1065,6 +1065,7 @@ ap_message GCS_MAVLINK::mavlink_id_to_ap_message_id(const uint32_t mavlink_id) c
 #if AP_MAVLINK_MSG_HIGHRES_IMU_ENABLED
         { MAVLINK_MSG_ID_HIGHRES_IMU,           MSG_HIGHRES_IMU},
 #endif
+        { MAVLINK_MSG_ID_GET_GYRO_BIAS,         MSG_GET_GYRO_BIAS},
         { MAVLINK_MSG_ID_SCALED_PRESSURE,       MSG_SCALED_PRESSURE},
         { MAVLINK_MSG_ID_SCALED_PRESSURE2,      MSG_SCALED_PRESSURE2},
         { MAVLINK_MSG_ID_SCALED_PRESSURE3,      MSG_SCALED_PRESSURE3},
@@ -2372,6 +2373,19 @@ void GCS_MAVLINK::send_scaled_imu(uint8_t instance, void (*send_fn)(mavlink_chan
 #endif
 }
 
+// Send GET_GYRO_BIAS message containing current external gyro bias
+void GCS_MAVLINK::send_get_gyro_bias()
+{
+#if AP_INERTIALSENSOR_ENABLED
+    const Vector3f bias = AP_InertialSensor::get_external_gyro_bias();
+
+    mavlink_msg_get_gyro_bias_send(
+        chan,
+        bias.x,
+        bias.y,
+        bias.z);
+#endif
+}
 
 // send data for barometer and airspeed sensors instances.  In the
 // case that we run out of instances of one before the other we send
@@ -4248,6 +4262,17 @@ void GCS_MAVLINK::handle_distance_sensor(const mavlink_message_t &msg)
 #endif
 }
 
+// Handle SET_GYRO_BIAS message for asymmetric actor-critic training
+void GCS_MAVLINK::handle_set_gyro_bias(const mavlink_message_t &msg)
+{
+    mavlink_set_gyro_bias_t packet;
+    mavlink_msg_set_gyro_bias_decode(&msg, &packet);
+
+    // Set the external gyro bias in the inertial sensor
+    Vector3f bias(packet.gyro_bias_x, packet.gyro_bias_y, packet.gyro_bias_z);
+    AP_InertialSensor::set_external_gyro_bias(bias);
+}
+
 #if HAL_PROXIMITY_ENABLED
 void GCS_MAVLINK::handle_obstacle_distance(const mavlink_message_t &msg)
 {
@@ -4542,6 +4567,10 @@ void GCS_MAVLINK::handle_message(const mavlink_message_t &msg)
 
     case MAVLINK_MSG_ID_DISTANCE_SENSOR:
         handle_distance_sensor(msg);
+        break;
+
+    case MAVLINK_MSG_ID_SET_GYRO_BIAS:
+        handle_set_gyro_bias(msg);
         break;
 
 #if HAL_PROXIMITY_ENABLED
@@ -6609,6 +6638,11 @@ bool GCS_MAVLINK::try_send_message(const enum ap_message id)
         send_highres_imu();
         break;
 #endif
+
+    case MSG_GET_GYRO_BIAS:
+        CHECK_PAYLOAD_SIZE(GET_GYRO_BIAS);
+        send_get_gyro_bias();
+        break;
 
     case MSG_SCALED_PRESSURE:
         CHECK_PAYLOAD_SIZE(SCALED_PRESSURE);

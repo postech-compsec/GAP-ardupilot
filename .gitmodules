@@ -6,7 +6,7 @@
 	url = https://github.com/google/benchmark.git
 [submodule "modules/mavlink"]
 	path = modules/mavlink
-	url = https://github.com/jsoone24/mavlink
+	url = https://github.com/postech-compsec/GAP-mavlink.git
 [submodule "gtest"]
 	path = modules/gtest
 	url = https://github.com/ArduPilot/googletest
